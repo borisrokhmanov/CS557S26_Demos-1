@@ -1,0 +1,11 @@
+services:
+  conda:
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    privileged: true
+    image: cs557
+    command: /bin/bash
+    container_name: cs557-env
+    platform: linux/amd64 # this just disables the warning, the image we use is only for amd64 anyway.
+    volumes:
+      - ./cs557-env:/cs557-env
