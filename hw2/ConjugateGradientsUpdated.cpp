@@ -5,7 +5,7 @@
 #include "Utilities.h"
 #include "Timer.h"
 
-#include "Part2KernelGroup.h"
+#include "GroupLine2.h"
 
 #include <iostream>
 

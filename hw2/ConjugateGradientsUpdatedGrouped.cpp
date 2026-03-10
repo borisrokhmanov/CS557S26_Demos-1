@@ -14,6 +14,7 @@ Timer InnerProductTimer;
 Timer NormTimer;
 Timer SaxpyTimer;
 Timer CopyTimer;
+Timer Part2KernelTimer;
 
 void ConjugateGradients(
     float (&x)[XDIM][YDIM][ZDIM],
@@ -24,12 +25,15 @@ void ConjugateGradients(
     const bool writeIterations)
 {
     // Algorithm : Line 2
-    ComputeLaplacianTimer.Start();
-    ComputeLaplacian(x, z);
-    ComputeLaplacianTimer.Pause();
-    SaxpyTimer.Start();
-    Saxpy(z, f, r, -1);
-    SaxpyTimer.Pause();
+    // ComputeLaplacianTimer.Start();
+    // ComputeLaplacian(x, z); //z = L(x)
+    // ComputeLaplacianTimer.Pause();
+    // SaxpyTimer.Start();
+    // Saxpy(z, f, r, -1); //r = -z + f
+    // SaxpyTimer.Pause();
+    Part2KernelTimer.Start();
+    GroupLine2(x, f, z, r);
+    Part2KernelTimer.Pause();
     NormTimer.Start();
     float nu = Norm(r);
     NormTimer.Pause();
@@ -51,12 +55,15 @@ void ConjugateGradients(
         std::cout << "Residual norm (nu) after " << k << " iterations = " << nu << std::endl;
 
         // Algorithm : Line 6
-        ComputeLaplacianTimer.Restart();
-        ComputeLaplacian(p, z);
-        ComputeLaplacianTimer.Pause();
-        InnerProductTimer.Restart();
-        float sigma=InnerProduct(p, z);
-        InnerProductTimer.Pause();
+        // ComputeLaplacianTimer.Restart();
+        // ComputeLaplacian(p, z);
+        // ComputeLaplacianTimer.Pause();
+        // InnerProductTimer.Restart();
+        // float sigma=InnerProduct(p, z);
+        // InnerProductTimer.Pause();
+        Part2KernelTimer.Restart();
+        float sigma = GroupLine6(p, z);
+        Part2KernelTimer.Pause();
 
         // Algorithm : Line 7
         float alpha=rho/sigma;
@@ -82,6 +89,7 @@ void ConjugateGradients(
             NormTimer.Print("Norm kernel: ");
             SaxpyTimer.Print("Saxpy kernel: ");
             CopyTimer.Print("Copy kernel: ");
+            Part2KernelTimer.Print("Part 2 Grouped kernel: ");
             return;
         }
             

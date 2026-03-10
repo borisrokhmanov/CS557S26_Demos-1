@@ -1,0 +1,74 @@
+Boris Rokhmanov CS557 HW2 Writeup
+
+I ran this code on a docker container running Ubuntu 22.04 using AMD64. The actual container ran on my MacBook Pro using the Apple M2 Pro CPU.
+I compiled the code using g++ in the MacOS Terminal, using the command g++ std=c++11 -O3 -fopenmp *.cpp
+
+Part 1:
+    Timing breakdown for serial run: (compiled with g++ std=c++11 -O3 *.cpp)
+
+    Conjugate Gradients terminated after 256 iterations; residual norm (nu) = 0.000975892
+    [ComputeLaplacian kernel: 1428.58ms]
+    [Inner Product kernel: 12327.1ms]
+    [Norm kernel: 8043.55ms]
+    [Saxpy kernel: 1770.51ms]
+    [Copy kernel: 602.773ms]
+    [Total time elapsed: 24184.1ms]
+
+    Timing breakdown for parallelized run: (compiled with g++ std=c++11 -O3 -fopenmp *.cpp)
+
+    Conjugate Gradients terminated after 256 iterations; residual norm (nu) = 0.000975892
+    [ComputeLaplacian kernel: 422.906ms]
+    [Inner Product kernel: 2098.13ms]
+    [Norm kernel: 1342.87ms]
+    [Saxpy kernel: 1844.1ms]
+    [Copy kernel: 352.103ms]
+    [Total time elapsed: 6071.07ms]
+
+    Updated code for timing kernels is in ConjugateGradientsUpdated.cpp
+
+Part 2:
+    I grouped the ComputeLaplacian and Saxpy calls in line 2, and the ComputeLaplacian and InnerProduct calls in line 6
+
+    Timing breakdown for grouped kernel serial run:
+
+    Conjugate Gradients terminated after 256 iterations; residual norm (nu) = 0.000975892
+    [ComputeLaplacian kernel: 0ms]
+    [Inner Product kernel: 6185.67ms]
+    [Norm kernel: 8033.2ms]
+    [Saxpy kernel: 1744.51ms]
+    [Copy kernel: 602.116ms]
+    [Part 2 Grouped kernel: 6302.8ms]
+    [Total time elapsed: 22879.9ms]
+
+    Timing breakdown for grouped kernel parallelized run:
+
+    Conjugate Gradients terminated after 256 iterations; residual norm (nu) = 0.000975892
+    [ComputeLaplacian kernel: 0ms]
+    [Inner Product kernel: 1027.06ms]
+    [Norm kernel: 1336.66ms]
+    [Saxpy kernel: 1750.87ms]
+    [Copy kernel: 357.571ms]
+    [Part 2 Grouped kernel: 1158.38ms]
+    [Total time elapsed: 5641.02ms]
+
+    Timing breakdown for nongrouped kernel serial run:
+
+    Conjugate Gradients terminated after 256 iterations; residual norm (nu) = 0.000975892
+    [ComputeLaplacian kernel: 1420.61ms]
+    [Inner Product kernel: 12328ms]
+    [Norm kernel: 8049.79ms]
+    [Saxpy kernel: 1766.46ms]
+    [Copy kernel: 599.586ms]
+    [Total time elapsed: 24176.1ms]
+
+    Timing breakdown for nongrouped kernel parallelized run:
+
+    Conjugate Gradients terminated after 256 iterations; residual norm (nu) = 0.000975892
+    [ComputeLaplacian kernel: 434ms]
+    [Inner Product kernel: 2045.21ms]
+    [Norm kernel: 1411.72ms]
+    [Saxpy kernel: 1861.28ms]
+    [Copy kernel: 356.263ms]
+    [Total time elapsed: 6118.63ms]
+
+    Updated code for grouped kernel is in ConjugateGradientsUpdatedGrouped.cpp

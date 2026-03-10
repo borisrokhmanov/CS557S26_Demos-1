@@ -2,6 +2,8 @@
 #include "Timer.h"
 #include "Utilities.h"
 
+Timer ConjGradTimer;
+
 int main(int argc, char *argv[])
 {
     using array_t = float (&) [XDIM][YDIM][ZDIM];
@@ -20,14 +22,21 @@ int main(int argc, char *argv[])
     
     // Initialization
     {
-        Timer timer;
-        timer.Start();
+        Timer initTimer;
+        Timer computeLaplacianTimer;
+        Timer InnerProductTimer;
+        Timer NormTimer;
+        Timer SaxpyTimer;
+        Timer CopyTimer;
+        initTimer.Start();
         InitializeProblem(x, f);
-        timer.Stop("Initialization : ");
+        initTimer.Stop("Initialization : ");
     }
 
     // Call Conjugate Gradients algorithm
+
+    ConjGradTimer.Start();
     ConjugateGradients(x, f, p, r, z);
-    
+    ConjGradTimer.Stop("Total time elapsed: ");
     return 0;
 }
