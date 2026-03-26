@@ -1,0 +1,49 @@
+Boris Rokhmanov CS557 HW3 Writeup
+
+I ran this code on a docker container running Ubuntu 22.04 using AMD64. The actual container ran on my MacBook Pro using the Apple M2 Pro CPU.
+I also ran the following commands in the docker container to download Intel MKL:
+wget https://registrationcenter-download.intel.com/akdlm/IRC_NAS/6a17080f-f0de-41b9-b587-52f92512c59a/intel-onemkl-2025.3.1.11_offline.sh
+sudo sh ./intel-onemkl-2025.3.1.11_offline.sh -a --silent --cli --eula accept
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/opt/intel/oneapi/mkl/2025.3/include/mkl.h"
+source /opt/intel/oneapi/setvars.h
+I compiled the code using 'g++ -std=c++11 -O3 -fopenmp \
+    -I${MKLROOT}/include \
+    -L${MKLROOT}/lib/intel64 \
+    -Wl,--no-as-needed \
+    -lmkl_intel_lp64 \
+    -lmkl_gnu_thread \
+    -lmkl_core \
+    -lgomp \
+    -lpthread -lm -ldl \
+    *.cpp'
+
+I replaced the InnerProduct(), Copy(), and Norm() calls.
+
+Compiled with DO_NOT_USE_MKL defined:
+
+[Initialization : 20020.4ms]
+...
+Conjugate Gradients terminated after 23 iterations; residual norm (nu) = 0.000850818
+[Total Laplacian Time : 673.967ms]
+[Total Saxpy Time : 82.2125ms]
+[Total Copy Time : 46.0909ms]
+[Total Norm Time : 128.124ms]
+[Total Inner Product Time : 182.159ms]
+
+Compiled without DO_NOT_USE_MKL defined:
+
+[Initialization : 19577.4ms]
+...
+Conjugate Gradients terminated after 23 iterations; residual norm (nu) = 0.000850565
+[Total Laplacian Time : 606.757ms]
+[Total Saxpy Time : 84.199ms]
+[Total Copy Time : 54.8188ms]
+[Total Norm Time : 39.5764ms]
+[Total Inner Product Time : 83.2697ms]
+
+Updated files:
+- main.cpp: added new timers for updated kernel calls
+- ConjugateGradients.cpp: instrumented kernel calls with timers
+- PointwiseOps.cpp: modified Copy() to call cblas_scopy()
+- Reductions.cpp: modified Norm() to call cblas_isamax(), modified InnerProduct() to call cblas_sdot()
+- CSRMatrix.h: added #include <stdexcept> to fix some compilation errors
