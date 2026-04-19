@@ -1,0 +1,40 @@
+Boris Rokhmanov CS557 HW4 Writeup
+
+I ran this code on a docker container running Ubuntu 22.04 using AMD64. The actual container ran on my MacBook Pro using the Apple M2 Pro CPU.
+I also ran the following commands in the docker container to download Intel MKL:
+wget https://registrationcenter-download.intel.com/akdlm/IRC_NAS/6a17080f-f0de-41b9-b587-52f92512c59a/intel-onemkl-2025.3.1.11_offline.sh
+sudo sh ./intel-onemkl-2025.3.1.11_offline.sh -a --silent --cli --eula accept
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/opt/intel/oneapi/mkl/2025.3/include/mkl.h"
+source /opt/intel/oneapi/setvars.h
+I compiled the code using 'g++ -std=c++11 -O3 -fopenmp \
+    -I${MKLROOT}/include \
+    -L${MKLROOT}/lib/intel64 \
+    -Wl,--no-as-needed \
+    -lmkl_intel_lp64 \
+    -lmkl_gnu_thread \
+    -lmkl_core \
+    -lgomp \
+    -lpthread -lm -ldl \
+    *.cpp'
+
+Compiled with -fopenmp: (average times)
+
+Block Size/Resolution         1024x1024          2048x2048           4096x4096
+32x32                         19.4694ms          136.732ms           1164.14ms
+64x64                         16.8189ms          121.07ms            939.074ms
+128x128                       17.9465ms          115.531ms           919.55ms
+
+Compiled without -fopenmp: (average times)
+
+Block Size/Resolution         1024x1024          2048x2048           4096x4096
+32x32                         106.932ms          882.597ms           8452.29ms
+64x64                         85.4454ms          681.455ms           5927.78ms
+128x128                       87.3843ms          688.802ms           5775.03ms
+
+- The most important difference in runtime, as expected, was compiling with OpenMP enabled. This made the code run roughly 8 to 10 times faster, on average.
+
+- Increasing the matrix resolution seemed to make block size more important, as the only real noticable difference was in the 4096x4096 matrix.
+
+- Larger block size helped performance in the 4096x4096 matrix but seemed to not be important in the other matrix sizes. It even hindered performance in the smaller 1024x1024 matrix.
+
+- I noticed that speedup was not quite proportional in the smallest 1024x1024 matrix. This is because the entire matrix is able to be cached, which speeds up memory access significantly in addition to parallelization.
